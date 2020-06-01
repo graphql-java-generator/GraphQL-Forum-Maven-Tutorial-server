@@ -1,22 +1,22 @@
-# A sample for the GraphQL Maven plugin (server side)
+# A tutorial for the GraphQL Maven plugin (server side)
 
-This Tutorial describes how-to create a GraphQL server, with the [graphql-maven-plugin](https://github.com/graphql-java-generator/graphql-maven-plugin-project)
+This Tutorial describes how-to create a GraphQL server, with the [graphql-maven-plugin](https://github.com/graphql-java-generator/graphql-maven-plugin-project) and the [graphql Gradle plugin](https://github.com/graphql-java-generator/graphql-gradle-plugin-project).
 
 
-The GraphQL Maven plugin helps both on the server and on the client side. You'll find the tutorial for the client side [on this page](../GraphQL-Forum-Maven-Sample-client)
+The GraphQL plugin helps both on the server and on the client side. You'll find the tutorial here the [client Maven tutorial](https://github.com/graphql-java-generator/GraphQL-Forum-Maven-Tutorial-client) and the [client Gradle tutorial](https://github.com/graphql-java-generator/GraphQL-Forum-Gradle-Tutorial-client).
 
 
 # Schema first
 
 This plugin allows a schema first approach.
 
-This approach is the best approach for APIs: it allows to precisely control the Interface Contract. This contract is the heart of all interface systems.
+This approach is the best approach for APIs: it allows to precisely control the Interface Contract. This contract is the heart of all connected systems.
 
 This tutorial won't describe how to create a GraphQL schema. There are plenty of resources on the net for that, starting with the [official GraphQL site](https://graphql.org/).
 
 # The Forum GraphQL schema
 
-This sample is based on the Forum schema, [available here](https://github.com/graphql-java-generator/GraphQL-Forum-Maven-Sample/blob/master/GraphQL-Forum-Maven-Sample-server/src/main/resources/forum.graphqls)
+This sample is based on the Forum schema, [available here](https://github.com/graphql-java-generator/GraphQL-Forum-Maven-Tutorial-server/blob/master/src/main/resources/forum.graphqls).
 
 This schema contains:
 
@@ -38,10 +38,13 @@ This schema is stored in the _/src/main/resources/_ project folder for convenien
 
 It could be also be used in another folder, like _/src/main/graphql/_. In this case, the schema is not stored in the packaged jar (which is Ok), and you have to use the plugin _schemaFileFolder_ parameter, to indicate where to find this schema.
 
-# The pom file
+## The Maven pom.xml and Gradle build.gradle files
 
-As a maven plugin, you have to add the plugin the build section of your pom (the full pom [is available here](https://github.com/graphql-java-generator/GraphQL-Forum-Maven-Sample/blob/master/GraphQL-Forum-Maven-Sample-server/pom.xml)):
-  
+As a Maven or a Gradle plugin, you have to add the plugin in the build:
+* For Maven, you add it in the build section of your pom (here is the [full pom](https://github.com/graphql-java-generator/GraphQL-Forum-Maven-Tutorial-server/blob/master/pom.xml)):
+* For Gradle, you declare the plugin, then configure it (here is the full [build.gradle](https://github.com/graphql-java-generator/GraphQL-Forum-Gradle-Tutorial-server/blob/master/build.gradle))
+
+Let's first have a look at the Maven **pom.xml** file:  
 
 ```XML
 	
@@ -113,10 +116,58 @@ As a maven plugin, you have to add the plugin the build section of your pom (the
 	</dependencies>
 ```
 
+Then the Gradle **build.gradle** file:
+
+```Groovy
+plugins {
+	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.8.1"
+	id 'java'
+}
+
+repositories {
+	jcenter()
+	mavenCentral()
+}
+
+dependencies {
+	// The graphql-java-runtime module agregates all dependencies for the generated code, including the plugin runtime
+	// CAUTION: this version should be exactly the same as the graphql-gradle-plugin's version
+	implementation "com.graphql-java-generator:graphql-java-runtime:1.8.1"
+	//implementation "org.apache.logging.log4j:log4j-slf4j-impl:2.12.1"
+	runtime 'com.graphql-java-kickstart:graphiql-spring-boot-starter:6.0.1'
+}
+
+// The line below makes the GraphQL plugin be executed before Java compiles, so that all sources are generated on time
+compileJava.dependsOn graphqlGenerateCode
+
+// The line below adds the generated sources as a java source folder
+sourceSets.main.java.srcDirs += '/build/generated/graphqlGenerateCode'
+
+// Let's configure the GraphQL Gradle Plugin:
+// All available parameters are described here: 
+// https://graphql-maven-plugin-project.graphql-java-generator.com/graphql-maven-plugin/graphql-mojo.html
+graphql {
+	mode = "server"  //This line is here only for the demo, as client is the default mode
+	packageName = 'org.forum.server'
+	packageName = 'org.forum.server.graphql'
+	scanBasePackages = 'org.forum.server.impl, org.forum.server.jpa'
+	customScalars = [ [
+			graphQLTypeName: "Date",
+			javaType: "java.util.Date",
+			graphQLScalarTypeStaticField: "com.graphql_java_generator.customscalars.GraphQLScalarTypeDate.Date"
+	] ]
+
+	// The parameters below change the 1.x default behavior to respect the future 2.x behavior
+	copyRuntimeSources = false
+	generateDeprecatedRequestResponse = false
+	separateUtilityClasses = true
+}
+```
+
 The compiler must be set to version 1.8 (or higher).
 
 In this plugin declaration:
-* The plugin execution is mapped to its graphql goal
+* (for Maven only) The plugin execution is mapped to its graphql goal
 * Its mode is set to _server_
 * The plugin generates the GraphQL code in the _packageName_ package (or in the _com.generated.graphql_ if this parameter is not defined)
 * The _scanBasePackages_ allows you to define additional packages that Spring will scan, to discover Spring beans, Spring data repositories or JPA entities
@@ -129,7 +180,9 @@ In this plugin declaration:
     * It is mandatory to give the implementation for each custom scalar defined in the GraphQL schema.
     * You'll find the relevant documentation on the [Plugin custom scalar doc page](https://graphql-maven-plugin-project.graphql-java-generator.com/customscalars.html)  
 
-You can add the _build-helper-maven-plugin_, so that the generated source is automatically added to the build path of your IDE.
+The generated source is added to the IDE sources, thanks to:
+* (for Maven) The _build-helper-maven-plugin_, so that the generated source is automatically added to the build path of your IDE.
+* (for Gradle) The _sourceSets.main.java.srcDirs += ..._ line
 
 The _graphql-java-runtime_ dependency add all necessary dependencies, for the generated code. Of course, its version must be the same as the plugin's version.
 
@@ -138,9 +191,15 @@ The [graphiql-spring-boot-starter](https://github.com/graphql-java-kickstart/gra
 
 # A look at the generated code
 
-Executing a _mvn clean compile_ will generate the server code in the _packageName_ package (or in the _com.generated.graphql_ if this parameter is not defined)
+Don't forget to execute (or re-execute) a full build when you change the plugin configuration, to renegerate the proper code:
+* (For Maven) Execute a _mvn clean compile_
+* (for Gradle) Execute a _gradlew clean build_
 
-The code is generated in the _/target/generated-sources/graphql-maven-plugin_ folder. And thanks to the _build-helper-maven-plugin_, it should automatically be added to your favorite IDE.
+This will generate the client code in the _packageName_ package (or in the _com.generated.graphql_ if this parameter is not defined).
+
+The code is generated in the :
+* (for Maven) _/target/generated-sources/graphql-maven-plugin_ folder. And thanks to the _build-helper-maven-plugin_, it should automatically be added as a source folder to your favorite IDE.
+* (for Gradle) _/build/generated-sources/graphql-maven-plugin_ folder. And thanks to the  _sourceSets.main.java.srcDirs += ..._ line in the _build.gradle_ file, it should automatically be added as a source folder to your favorite IDE.
 
 Let's take a look at the generated code:
 * The __org.forum.server.graphql__ package contains all classes that maps to the GraphQL schema:
@@ -186,14 +245,14 @@ This sample embeds an H2 in-memory database, that is field with sample data when
 
 This sample reuses what has been done for the [graphql-maven-plugin-samples-Forum-server module](https://github.com/graphql-java-generator/graphql-maven-plugin-project/tree/master/graphql-maven-plugin-samples/graphql-maven-plugin-samples-Forum-server) of the graphql-maven-plugin. It contains these files, in the src/main/resources folder:
 * _[data.xlsx](https://github.com/graphql-java-generator/graphql-maven-plugin-project/blob/master/graphql-maven-plugin-samples/graphql-maven-plugin-samples-Forum-server/src/main/resources/data.xlsx?raw=true)_ is the raw source data
-* _[schema.sql](https://github.com/graphql-java-generator/GraphQL-Forum-Maven-Sample/blob/master/GraphQL-Forum-Maven-Sample-server/src/main/resources/schema.sql)_ is executed at startup, against the embedded H2 in-memory database. It creates the necessary tables
-* _[data.sql](https://github.com/graphql-java-generator/GraphQL-Forum-Maven-Sample/blob/master/GraphQL-Forum-Maven-Sample-server/src/main/resources/data.sql)_ is then executed, also at startup. It loads the sample data in the database  
+* _[schema.sql](https://github.com/graphql-java-generator/GraphQL-Forum-Gradle-Tutorial-server/blob/master/src/main/resources/schema.sql)_ is executed at startup, against the embedded H2 in-memory database. It creates the necessary tables
+* _[data.sql](https://github.com/graphql-java-generator/GraphQL-Forum-Gradle-Tutorial-server/blob/master/src/main/resources/data.sql)_ is then executed, also at startup. It loads the sample data in the database  
 
 # The application.properties file
 
 The _application.properties_ file is the standard Spring Boot configuration file. It allow to manage almost all the application parameters: server port, database parameters, tls... You'll lors of documentation about it on the net, starting with [the Spring doc](https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html). 
 
-The application.properties for this sample is [available here](https://github.com/graphql-java-generator/GraphQL-Forum-Maven-Sample/blob/master/GraphQL-Forum-Maven-Sample-server/src/main/resources/application.properties).
+The application.properties for this sample is [available here](https://github.com/graphql-java-generator/GraphQL-Forum-Gradle-Tutorial-server/blob/master/src/main/resources/application.properties).
 
 It's a very simple one, that contains these parameters:
 * server.port = 8180
@@ -247,14 +306,14 @@ For each of these DataFetchersDelegateXxx interfaces, you have to:
     * The _scanBasePackages_ package or one of its subpackages, if the _scanBasePackages_ plugin parameter is defined.
 * Add the @Component Spring annotation to allow Spring to discover it
 
-Please note that, when you change something in the pom, you need to execute a _mvn compile_ to regenerate the code.
+Please note that, when you change something in the Maven pom.xml or Gradle build.gradle file, you need to execute a _mvn clean compile_ or a _gradlew clean compileJava_ to regenerate the code.
 
 Once you created all DataFetchersDelegate implementation, the server should be able to start.
 
 For instance, you can create each DataFetchersDelegate implementation, with all methods returning null. This allows to check that the global code structure is ready.
 
 Just execute the _org.forum.server.graphql.util.GraphQLServerMain_ class to check that, where:
-* _org.forum.server.graphql_ is the _packageName_ parameter, as defined in the pom.xml or gradle.build
+* _org.forum.server.graphql_ is the _packageName_ parameter, as defined in the Maven pom.xml or Gradle build.gradle file
 * The _util_ subpackage is created because the _separateUtilityClasses_ plugin parameter is set to _true_
 
 At this point, if it complains because it doesn't find a bean, check that:
@@ -269,9 +328,12 @@ Let's dot it, for this forum sample.
 
 # Update of the project configuration
 
-For the next steps, we'll add these updates to the pom (TODO build.gradle):
+For the next steps, we'll add these updates to the Maven pom.xml or Gradle build.gradle file:
 
-Let's first add the JPA dependencies, and the H2 database runtime:
+Let's first add the JPA dependencies, the H2 database runtime and the Dozer dependency.
+
+
+Here is for the pom Maven file:
 
 ```XML
 	<dependencies>
@@ -288,15 +350,6 @@ Let's first add the JPA dependencies, and the H2 database runtime:
 			<scope>runtime</scope>
 			<version>1.4.199</version>
 		</dependency>
-...
-	</dependencies>
-```
-
-Then the dozer dependency:
-
-```XML
-	<dependencies>
-...
 		<dependency>
 			<groupId>com.github.dozermapper</groupId>
 			<artifactId>dozer-core</artifactId>
@@ -305,6 +358,22 @@ Then the dozer dependency:
 ...
 	</dependencies>
 ```
+
+Then for the build.gradle Gradle file:
+
+```Groovy
+dependencies {
+...
+	
+	implementation 'com.github.dozermapper:dozer-core:6.5.0'
+	// The Spring Boot version should be the same as the Spring Boot version of the graphql-gradle-plugin
+	implementation('org.springframework.boot:spring-boot-starter-data-jpa:2.2.6.RELEASE') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+	runtime 'com.h2database:h2:1.4.199'
+}
+```
+
 
 Then, we need to create the dozer Spring Bean. So we created a SpringConfig class, in the _org.forum.server.impl_ package. This class:
 * Declares the JPA package, where Entities and Spring Repositories are to be searched
@@ -369,7 +438,7 @@ You'll find lots of Spring documentation on the net, starting with the [Spring r
 
 We now need to create our JPA Entities. 
 
-As we expect differences between the database and the GraphQL schemas, we create a separate set of classes for the JPA Entities. These classes have been created in the [org.forum.server.jpa](https://github.com/graphql-java-generator/GraphQL-Forum-Maven-Sample/tree/master/GraphQL-Forum-Maven-Sample-server/src/main/java/org/forum/server/jpa) package.
+As we expect differences between the database and the GraphQL schemas, we create a separate set of classes for the JPA Entities. These classes have been created in the [org.forum.server.jpa](https://github.com/graphql-java-generator/GraphQL-Forum-Gradle-Tutorial-server/tree/master/src/main/java/org/forum/server/jpa) package.
 
 Let's have a look at the Topic Entity:
 
@@ -415,11 +484,11 @@ __Spring Discovery__ : the JPA Entities are discovered by Spring the package of 
 * The standard one is to add a _@EntityScan_ annotation to a Spring Configuration class:
     * It can be the main one, here the generated _GraphQLServerMain_ class. But as it's generated, your updates would be cleared at each generation.
     * You can add your own Configuration class, like done in this tutorial:
-        * [SpringConfig](https://github.com/graphql-java-generator/GraphQL-Forum-Maven-Sample/blob/master/GraphQL-Forum-Maven-Sample-server/src/main/java/org/forum/server/impl/SpringConfig.java) is a Spring Configuration class, as it's annotated by _@Configuration_ __and__ it's in a package or subpackage marked in the _scanBasePackages_ plugin parameter of the _@SpringBootApplication_ of _GraphQLServerMain_'s annotation. This last part is done, thanks to the c
+        * [SpringConfig](https://github.com/graphql-java-generator/GraphQL-Forum-Gradle-Tutorial-server/blob/master/src/main/java/org/forum/server/impl/SpringConfig.java) is a Spring Configuration class, as it's annotated by _@Configuration_ __and__ it's in a package or subpackage marked in the _scanBasePackages_ plugin parameter of the _@SpringBootApplication_ of _GraphQLServerMain_'s annotation. This last part is done, thanks to the c
          * It contains the _@EntityScan_ annotation, that indicates to scan the _org.forum.server.jpa_ package
 * This plugin will add the _@EntityScan_ annotation with all packages of the _@EntityScan_ annotation, __but only if__ the _generateJPAAnnotation_ plugin parameter is set to true
 
-As we don't use the plugin _generateJPAAnnotation_ plugin parameter, we created [SpringConfig](https://github.com/graphql-java-generator/GraphQL-Forum-Maven-Sample/blob/master/GraphQL-Forum-Maven-Sample-server/src/main/java/org/forum/server/impl/SpringConfig.java) in the _org.forum.server.impl_ and this package is given to the plugin with the _scanBasePackages_ plugin parameter.
+As we don't use the plugin _generateJPAAnnotation_ plugin parameter, we created [SpringConfig](https://github.com/graphql-java-generator/GraphQL-Forum-Gradle-Tutorial-server/blob/master/src/main/java/org/forum/server/impl/SpringConfig.java) in the _org.forum.server.impl_ and this package is given to the plugin with the _scanBasePackages_ plugin parameter.
 
 This _SpringConfig_ allows us to add whatever Spring configuration we want. Here, like explained above, we added: the scan for JPA repsitories (@EnableJpaRepositories), the scan for JPA entities (@EntityScan) and the mapper bean.
 
@@ -429,13 +498,13 @@ This _SpringConfig_ allows us to add whatever Spring configuration we want. Here
 
 If you use JPA, like in this sample, you should also take a look at the [JPA Repositories](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.repositories).
 
-In this tutorial, these repositories are stored in the [org.forum.server.jpa.repositories](https://github.com/graphql-java-generator/GraphQL-Forum-Maven-Sample/tree/master/GraphQL-Forum-Maven-Sample-server/src/main/java/org/forum/server/jpa/repositories) package.
+In this tutorial, these repositories are stored in the [org.forum.server.jpa.repositories](https://github.com/graphql-java-generator/GraphQL-Forum-Gradle-Tutorial-server/tree/master/src/main/java/org/forum/server/jpa/repositories) package.
 
 All repositories are standard Spring data repositories.
 
-The only particular thing is the [FindTopicRepository](https://github.com/graphql-java-generator/GraphQL-Forum-Maven-Sample/blob/master/GraphQL-Forum-Maven-Sample-server/src/main/java/org/forum/server/jpa/repositories/FindTopicRepository.java) one. It adds a "complex" research capability, that is implemented in the [FindTopicRepositoryImpl](https://github.com/graphql-java-generator/GraphQL-Forum-Maven-Sample/blob/master/GraphQL-Forum-Maven-Sample-server/src/main/java/org/forum/server/jpa/repositories/FindTopicRepositoryImpl.java) class.
+The only particular thing is the [FindTopicRepository](https://github.com/graphql-java-generator/GraphQL-Forum-Gradle-Tutorial-server/blob/master/src/main/java/org/forum/server/jpa/repositories/FindTopicRepository.java) one. It adds a "complex" research capability, that is implemented in the [FindTopicRepositoryImpl](https://github.com/graphql-java-generator/GraphQL-Forum-Gradle-Tutorial-server/blob/master/src/main/java/org/forum/server/jpa/repositories/FindTopicRepositoryImpl.java) class.
 
-The [TopicRepository](https://github.com/graphql-java-generator/GraphQL-Forum-Maven-Sample/blob/master/GraphQL-Forum-Maven-Sample-server/src/main/java/org/forum/server/jpa/repositories/TopicRepository.java) repository just implement the _FindTopicRepository_ to benefit from this search capability.
+The [TopicRepository](https://github.com/graphql-java-generator/GraphQL-Forum-Gradle-Tutorial-server/blob/master/src/main/java/org/forum/server/jpa/repositories/TopicRepository.java) repository just implement the _FindTopicRepository_ to benefit from this search capability.
 
 Spring data and JPA repositories are very rich: you should really take a look at their document, if you haven't already, to see what capabilities they offer.
 
@@ -466,7 +535,7 @@ Dozer is very easy to use, and requires no configuration at all for standard map
 * JMapper seems to be dead (no commit since 2017, and only 4 contributors)
 * Orika seems also promising. It also requires no configuration for standard mapping. It throws an [annoying warning](https://github.com/orika-mapper/orika/issues/280), but it seems to be transparent, and it will be soon corrected.
 
-As the Dozer map can't map a list of object, a utility method has been created in the [Util class](https://github.com/graphql-java-generator/GraphQL-Forum-Maven-Sample/blob/master/GraphQL-Forum-Maven-Sample-server/src/main/java/org/forum/server/impl/Util.java), that maps list of object. It is reused in the Data Fetcher Delegates
+As the Dozer map can't map a list of object, a utility method has been created in the [Util class](https://github.com/graphql-java-generator/GraphQL-Forum-Gradle-Tutorial-server/blob/master/src/main/java/org/forum/server/impl/Util.java), that maps list of object. It is reused in the Data Fetcher Delegates
 
 ### Let's start with the simplest query: boards
 
@@ -539,20 +608,20 @@ public class DataFetchersDelegateQueryTypeImpl implements DataFetchersDelegateQu
 This class is a Spring Bean, as it is marked by the _@Component_ Spring annotation. It contains:
 * Three Spring beans attributes, that will be set by the Spring IoC framework when this Bean is loaded:
     * The _boardRepository_ is a Spring data repository. It's a bean, as it implements a Spring Data repository interface. 
-    * The _mapper_ bean is declared in the [SpringConfig](https://github.com/graphql-java-generator/GraphQL-Forum-Maven-Sample/blob/master/GraphQL-Forum-Maven-Sample-server/src/main/java/org/forum/server/impl/SpringConfig.java) configuration class.
-    * The _util_ bean is declared in the [Util](https://github.com/graphql-java-generator/GraphQL-Forum-Maven-Sample/blob/master/GraphQL-Forum-Maven-Sample-server/src/main/java/org/forum/server/impl/Util.java) class, and it's a Spring bean thanks to its _@Component_ annotation.
+    * The _mapper_ bean is declared in the [SpringConfig](https://github.com/graphql-java-generator/GraphQL-Forum-Gradle-Tutorial-server/blob/master/src/main/java/org/forum/server/impl/SpringConfig.java) configuration class.
+    * The _util_ bean is declared in the [Util](https://github.com/graphql-java-generator/GraphQL-Forum-Gradle-Tutorial-server/blob/master/src/main/java/org/forum/server/impl/Util.java) class, and it's a Spring bean thanks to its _@Component_ annotation.
 * The _boards_ method is the only implemented method, for a first test:
     * It executes the query against the database, by executing the relevant boardRepository method.
     * It then maps the result into a list of Board GraphQL objects
 
-And that's all!
+And you're done!
 
 The graphql-java framework and the code generated by the plugin take care of handling the request, wiring it to this _boards()_ method, get its result, and return it back to the caller.
 
 
 ### Let's test this first implemented query
 
-Starts the server, by executing the _org.forum.server.graphql.util.GraphQLServerMain_ class, available in the _/target/generated-sources/graphql-maven-plugin_ folder.
+Starts the server, by executing the _org.forum.server.graphql.util.GraphQLServerMain_ class, available in the _/target/generated-sources/graphql-maven-plugin_ folder (or _/build/generated-sources/graphql-maven-plugin_ for Maven).
 
 The output should finish by this message: _Started GraphQLServerMain in xxx seconds_
 
@@ -564,12 +633,12 @@ query {boards {id name}}
 ```
 
 __If the server didn't start__, an error message is displayed. The most probable cause is that the Spring components are not properly configured. In this case, check that:
-* The _scanBasePackages_ plugin parameter is defined in you pom or graddle.plugin file, and contain the package that contains the _SpringConfig_ class (or one of its parent package)
+* The _scanBasePackages_ plugin parameter is defined in your pom or gradle.plugin file, and contains the package that contains the _SpringConfig_ class (or one of its parent package)
 * All your Spring beans (startign by the Data Fetcher Delegate implementations) have the _@Component_ annotation (for classes) or _@Bean_ for method into a class annotated by _@Configuration_
 * The _SpringConfig_ class is marked with the _org.springframework.context.annotation.Configuration_ annotation
  * The _SpringConfig_ class contains the _org.springframework.data.jpa.repository.config.EnableJpaRepositories_ annotation, which has this parameter: _(basePackages = { "xxxx" })_ (where _xxxx_  the package that contains your Spring repositories or one of its parent package)
 * The _SpringConfig_ class contains the _org.springframework.boot.autoconfigure.domain.EntityScan_ which has this parameter: _(basePackages = { "xxxx" })_ (where _xxxx_  the package that contains your JPA entities or one of its parent package)
-* You regenerated the code, by executing the _mvn clean package_ command.
+* You regenerated the code, by executing the _mvn clean package_ or a _gradlew clean compileJava_ command.
 
 If all this fails, please raise an issue.
 
@@ -947,9 +1016,11 @@ To implement it, we'll have to:
 
 Let's go !
 
-We first add the ReactiveX dependency in the pom:
+We first add the ReactiveX dependency in the Maven pom.xml or Gradle build.gradle file:
 
-```
+The Maven **pom.xml** file:
+
+```XML
 	<dependencies>
 ...
       <dependency>
@@ -959,6 +1030,17 @@ We first add the ReactiveX dependency in the pom:
       </dependency>
 ...
 	</dependencies>
+```
+
+Or the Gradle **build.gradle** file:
+
+```Groovy
+dependencies {
+
+...
+
+	implementation 'io.reactivex.rxjava2:rxjava:2.2.19'
+}
 ```
 
 Then, we create the [ReactiveX Subject](http://reactivex.io/documentation/subject.html). To do that, we implement a _PostPublisher_ class in the _org.forum.server.impl_ package:
