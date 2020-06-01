@@ -1,0 +1,3 @@
+Todo list...
+* server: inherit from plugin as a parent pom
+* Switch from dozer to orika, once this [annoying warning](https://github.com/orika-mapper/orika/issues/280) is corrected
