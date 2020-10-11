@@ -9,8 +9,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 
-import com.graphql_java_generator.annotation.GraphQLNonScalar;
-
 @Entity(name = "Board")
 public class BoardEntity {
 
@@ -23,7 +21,6 @@ public class BoardEntity {
 	boolean publiclyAvailable;
 
 	@Transient
-	@GraphQLNonScalar(fieldName = "topics", graphQLTypeName = "Topic", javaClass = TopicEntity.class)
 	List<TopicEntity> topics;
 
 	public UUID getId() {
