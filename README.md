@@ -1,5 +1,6 @@
 # A tutorial for the GraphQL Maven plugin (server side)
 
+
 This Tutorial describes how-to create a GraphQL server, with the [graphql-maven-plugin](https://github.com/graphql-java-generator/graphql-maven-plugin-project) and the [graphql Gradle plugin](https://github.com/graphql-java-generator/graphql-gradle-plugin-project).
 
 
@@ -68,7 +69,7 @@ Let's first have a look at the Maven **pom.xml** file:
 				<executions>
 					<execution>
 						<goals>
-							<goal>graphql</goal>
+							<goal>generateServerCode</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -120,7 +121,7 @@ Then the Gradle **build.gradle** file:
 
 ```Groovy
 plugins {
-	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.8.1"
+	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.11"
 	id 'java'
 }
 
@@ -132,21 +133,21 @@ repositories {
 dependencies {
 	// The graphql-java-runtime module agregates all dependencies for the generated code, including the plugin runtime
 	// CAUTION: this version should be exactly the same as the graphql-gradle-plugin's version
-	implementation "com.graphql-java-generator:graphql-java-runtime:1.8.1"
+	implementation "com.graphql-java-generator:graphql-java-runtime:1.11"
 	//implementation "org.apache.logging.log4j:log4j-slf4j-impl:2.12.1"
 	runtime 'com.graphql-java-kickstart:graphiql-spring-boot-starter:6.0.1'
 }
 
 // The line below makes the GraphQL plugin be executed before Java compiles, so that all sources are generated on time
-compileJava.dependsOn graphqlGenerateCode
+compileJava.dependsOn generateServerCode
 
 // The line below adds the generated sources as a java source folder
-sourceSets.main.java.srcDirs += '/build/generated/graphqlGenerateCode'
+sourceSets.main.java.srcDirs += '/build/generated/generateServerCode'
 
 // Let's configure the GraphQL Gradle Plugin:
 // All available parameters are described here: 
-// https://graphql-maven-plugin-project.graphql-java-generator.com/graphql-maven-plugin/graphql-mojo.html
-graphql {
+// https://graphql-maven-plugin-project.graphql-java-generator.com/graphql-maven-plugin/generateServerCode-mojo.html
+generateServerCodeConf {
 	mode = "server"  //This line is here only for the demo, as client is the default mode
 	packageName = 'org.forum.server'
 	packageName = 'org.forum.server.graphql'
@@ -167,7 +168,7 @@ graphql {
 The compiler must be set to version 1.8 (or higher).
 
 In this plugin declaration:
-* (for Maven only) The plugin execution is mapped to its graphql goal
+* (for Maven only) The plugin execution is mapped to its generateServerCode goal
 * Its mode is set to _server_
 * The plugin generates the GraphQL code in the _packageName_ package (or in the _com.generated.graphql_ if this parameter is not defined)
 * The _scanBasePackages_ allows you to define additional packages that Spring will scan, to discover Spring beans, Spring data repositories or JPA entities
@@ -192,14 +193,14 @@ The [graphiql-spring-boot-starter](https://github.com/graphql-java-kickstart/gra
 # A look at the generated code
 
 Don't forget to execute (or re-execute) a full build when you change the plugin configuration, to renegerate the proper code:
-* (For Maven) Execute a _mvn clean compile_
-* (for Gradle) Execute a _gradlew clean build_
+* (For Maven) Execute _mvn clean compile_
+* (for Gradle) Execute _gradlew clean build_
 
 This will generate the client code in the _packageName_ package (or in the _com.generated.graphql_ if this parameter is not defined).
 
 The code is generated in the :
 * (for Maven) _/target/generated-sources/graphql-maven-plugin_ folder. And thanks to the _build-helper-maven-plugin_, it should automatically be added as a source folder to your favorite IDE.
-* (for Gradle) _/build/generated-sources/graphql-maven-plugin_ folder. And thanks to the  _sourceSets.main.java.srcDirs += ..._ line in the _build.gradle_ file, it should automatically be added as a source folder to your favorite IDE.
+* (for Gradle) _/build/generated-sources/generateServerCode_ folder. And thanks to the  _sourceSets.main.java.srcDirs += ..._ line in the _build.gradle_ file, it should automatically be added as a source folder to your favorite IDE.
 
 Let's take a look at the generated code:
 * The __org.forum.server.graphql__ package contains all classes that maps to the GraphQL schema:
