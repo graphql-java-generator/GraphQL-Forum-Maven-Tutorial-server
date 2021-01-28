@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Resource;
 
+import org.dataloader.BatchLoaderEnvironment;
 import org.dataloader.DataLoader;
 import org.forum.server.graphql.Member;
 import org.forum.server.graphql.Post;
@@ -89,7 +90,7 @@ public class DataFetchersDelegateTopicImpl implements DataFetchersDelegateTopic 
 	}
 
 	@Override
-	public List<Topic> batchLoader(List<UUID> keys) {
+	public List<Topic> batchLoader(List<UUID> keys, BatchLoaderEnvironment env) {
 		Iterable<TopicEntity> topics = topicRepository.findAllById(keys);
 		return util.mapList(topics, TopicEntity.class, Topic.class);
 	}

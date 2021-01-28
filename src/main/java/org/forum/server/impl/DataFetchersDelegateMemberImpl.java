@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import javax.annotation.Resource;
 
+import org.dataloader.BatchLoaderEnvironment;
 import org.forum.server.graphql.Member;
 import org.forum.server.graphql.util.DataFetchersDelegateMember;
 import org.forum.server.jpa.MemberEntity;
@@ -22,7 +23,7 @@ public class DataFetchersDelegateMemberImpl implements DataFetchersDelegateMembe
 	private MemberRepository memberRepository;
 
 	@Override
-	public List<Member> batchLoader(List<UUID> keys) {
+	public List<Member> batchLoader(List<UUID> keys, BatchLoaderEnvironment env) {
 		Iterable<MemberEntity> members = memberRepository.findAllById(keys);
 		return util.mapList(members, MemberEntity.class, Member.class);
 	}
