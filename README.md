@@ -121,7 +121,7 @@ Then the Gradle **build.gradle** file:
 
 ```Groovy
 plugins {
-	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.12.1"
+	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.14.1"
 	id 'java'
 }
 
@@ -133,24 +133,30 @@ repositories {
 dependencies {
 	// The graphql-java-runtime module agregates all dependencies for the generated code, including the plugin runtime
 	// CAUTION: this version should be exactly the same as the graphql-gradle-plugin's version
-	implementation "com.graphql-java-generator:graphql-java-server-dependencies:1.12"
-	implementation "org.apache.logging.log4j:log4j-slf4j-impl:2.12.1"
-	runtime 'com.graphql-java-kickstart:graphiql-spring-boot-starter:6.0.1'
+	implementation 'com.graphql-java-generator:graphql-java-server-dependencies:1.14.1'
+	implementation 'com.github.dozermapper:dozer-core:6.5.0'
+	implementation 'io.reactivex.rxjava2:rxjava:2.2.19'
+	
+	// The Spring Boot version should be the same as the Spring Boot version of the graphql-gradle-plugin
+	implementation('org.springframework.boot:spring-boot-starter-data-jpa:2.4.4')
+	
+	runtimeOnly 'com.graphql-java-kickstart:graphiql-spring-boot-starter:6.0.1'
+	runtimeOnly 'com.h2database:h2:1.4.200'
 }
 
 // The line below makes the GraphQL plugin be executed before Java compiles, so that all sources are generated on time
 compileJava.dependsOn generateServerCode
 
 // The line below adds the generated sources as a java source folder
-sourceSets.main.java.srcDirs += '/build/generated/generateServerCode'
+sourceSets.main.java.srcDirs += '/build/generated/graphql-maven-plugin'
 
 // Let's configure the GraphQL Gradle Plugin:
 // All available parameters are described here: 
 // https://graphql-maven-plugin-project.graphql-java-generator.com/graphql-maven-plugin/generateServerCode-mojo.html
 generateServerCodeConf {
-	mode = "server"  //This line is here only for the demo, as client is the default mode
 	packageName = 'org.forum.server'
-	packageName = 'org.forum.server.graphql'
+	packageName = 'org.forum.server.graphql'	
+	generateBatchLoaderEnvironment = true
 	scanBasePackages = 'org.forum.server.impl, org.forum.server.jpa'
 	customScalars = [ [
 			graphQLTypeName: "Date",
@@ -158,8 +164,8 @@ generateServerCodeConf {
 			graphQLScalarTypeStaticField: "com.graphql_java_generator.customscalars.GraphQLScalarTypeDate.Date"
 	] ]
 
-	// The parameters below change the 1.x default behavior to respect the future 2.x behavior
-	generateBatchLoaderEnvironment = true
+	// The parameters below change the 1.x default behavior. They are set to respect the behavior of the future 2.x versions
+	//generateBatchLoaderEnvironment = true
 	separateUtilityClasses = true
 }
 ```
