@@ -3,13 +3,22 @@
  */
 package org.forum.server.impl;
 
+import javax.annotation.Resource;
+
 import org.forum.server.graphql.Post;
+import org.forum.server.jpa.BoardEntity;
+import org.forum.server.jpa.PostEntity;
+import org.forum.server.jpa.TopicEntity;
+import org.forum.server.jpa.repositories.BoardRepository;
+import org.forum.server.jpa.repositories.PostRepository;
+import org.forum.server.jpa.repositories.TopicRepository;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.subjects.PublishSubject;
@@ -25,6 +34,13 @@ public class PostPublisher {
 
 	/** The logger for this instance */
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
+
+	@Resource
+	BoardRepository boardRepository;
+	@Resource
+	PostRepository postRepository;
+	@Resource
+	TopicRepository topicRepository;
 
 	PublishSubject<Post> subject = PublishSubject.create();
 
@@ -73,8 +89,20 @@ public class PostPublisher {
 	 * @return
 	 */
 	Publisher<Post> getPublisher(String boardName) {
-		logger.debug("Executing Suscription for {}", boardName);
-		return subject.toFlowable(BackpressureStrategy.BUFFER);
+		logger.debug("Executing Subscription for {}", boardName);
+
+		Flowable<Post> publisher = subject.toFlowable(BackpressureStrategy.BUFFER);
+
+		if (boardName != null) {
+			publisher.filter((post) -> {
+				PostEntity postEntity = postRepository.findById(post.getId()).get();
+				TopicEntity topicEntity = topicRepository.findById(postEntity.getTopicId()).get();
+				BoardEntity boardEntity = boardRepository.findById(topicEntity.getBoardId()).get();
+				return boardEntity.getName().equals(boardName);
+			});
+		}
+
+		return publisher;
 	}
 
 }
