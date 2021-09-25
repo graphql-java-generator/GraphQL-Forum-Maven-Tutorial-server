@@ -3,7 +3,7 @@ package org.forum.server.impl;
 import javax.annotation.Resource;
 
 import org.forum.server.graphql.Post;
-import org.forum.server.graphql.util.DataFetchersDelegateSubscriptionType;
+import org.forum.server.graphql.util.DataFetchersDelegateSubscription;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,7 @@ import graphql.schema.DataFetchingEnvironment;
 import io.reactivex.subjects.Subject;
 
 @Component
-public class DataFetchersDelegateSubscriptionTypeImpl implements DataFetchersDelegateSubscriptionType {
+public class DataFetchersDelegateSubscriptionTypeImpl implements DataFetchersDelegateSubscription {
 
 	/** The logger for this instance */
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());

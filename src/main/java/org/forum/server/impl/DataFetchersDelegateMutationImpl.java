@@ -5,15 +5,19 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.forum.server.graphql.Board;
+import org.forum.server.graphql.Member;
+import org.forum.server.graphql.MemberInput;
 import org.forum.server.graphql.Post;
 import org.forum.server.graphql.PostInput;
 import org.forum.server.graphql.Topic;
 import org.forum.server.graphql.TopicInput;
-import org.forum.server.graphql.util.DataFetchersDelegateMutationType;
+import org.forum.server.graphql.util.DataFetchersDelegateMutation;
 import org.forum.server.jpa.BoardEntity;
+import org.forum.server.jpa.MemberEntity;
 import org.forum.server.jpa.PostEntity;
 import org.forum.server.jpa.TopicEntity;
 import org.forum.server.jpa.repositories.BoardRepository;
+import org.forum.server.jpa.repositories.MemberRepository;
 import org.forum.server.jpa.repositories.PostRepository;
 import org.forum.server.jpa.repositories.TopicRepository;
 import org.springframework.stereotype.Component;
@@ -24,7 +28,7 @@ import graphql.schema.DataFetchingEnvironment;
 import io.reactivex.subjects.Subject;
 
 @Component
-public class DataFetchersDelegateMutationTypeImpl implements DataFetchersDelegateMutationType {
+public class DataFetchersDelegateMutationImpl implements DataFetchersDelegateMutation {
 
 	@Resource
 	private Mapper mapper;
@@ -35,6 +39,8 @@ public class DataFetchersDelegateMutationTypeImpl implements DataFetchersDelegat
 	TopicRepository topicRepository;
 	@Resource
 	PostRepository postRepository;
+	@Resource
+	MemberRepository memberRepository;
 
 	/**
 	 * This {@link Subject} will be notified for each Post creation. This is the basis for the <I>subscribeToNewPost</I>
@@ -85,6 +91,18 @@ public class DataFetchersDelegateMutationTypeImpl implements DataFetchersDelegat
 		postPublisher.onNext(newPost);
 
 		return newPost;
+	}
+
+	@Override
+	public Member createMember(DataFetchingEnvironment dataFetchingEnvironment, MemberInput input) {
+		MemberEntity newMemberEntity = new MemberEntity();
+		newMemberEntity.setAlias(input.getAlias());
+		newMemberEntity.setEmail(input.getEmail());
+		newMemberEntity.setName(input.getName());
+		newMemberEntity.setType(input.getType().name());
+		memberRepository.save(newMemberEntity);
+
+		return mapper.map(newMemberEntity, Member.class);
 	}
 
 	@Override

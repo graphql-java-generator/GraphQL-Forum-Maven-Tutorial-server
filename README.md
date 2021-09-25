@@ -24,9 +24,9 @@ This schema contains:
 * A custom scalar definition: Date.
     * This allows to define new type to define objet's field. We'll have to provide it's implementation to read and write Date fields. 
 * A schema object. This declaration is optional. It allows to define query/mutation/subscription specific names. This schema declares:
-    * QueryType as a query.
-    * MutationType as a mutation
-    * SubscriptionType as a subscription
+    * Query as a query.
+    * Mutation as a mutation
+    * Subscription as a subscription
     * These types are declared below, as any regular object. Their definition is that of standard Object, but their meaning is very different. These fields are respectively the queries, mutations and subscriptions that you can execute, as a client GraphQL schema that connects to a GraphQL server that implements this schema.
 * Four regular GraphQL objects: Member, Board, Topic, Post
     * These are the objects defined in the Object model that can queried (with queries or subscriptions), or inserted/updated (with mutations)
@@ -241,9 +241,9 @@ These Data Fetchers are based on the Data Fetcher Delegates that you must provid
 * The methods of a Data Fetcher Delegate are all the Data Fetchers (or resolvers) for one GraphQL object, query, mutation or subscription.
 
 In this sample based on the forum GraphQL schema, these Data Fetcher Delegates must be implemented:
-* DataFetchersDelegateQueryType: manages all queries defined in the GraphQL schema
-* DataFetchersDelegateMutationType: manages all mutations defined in the GraphQL schema
-* DataFetchersDelegateSubscriptionType: manages all subscriptions defined in the GraphQL schema
+* DataFetchersDelegateQuery: manages all queries defined in the GraphQL schema
+* DataFetchersDelegateMutation: manages all mutations defined in the GraphQL schema
+* DataFetchersDelegateSubscription: manages all subscriptions defined in the GraphQL schema
 * DataFetchersDelegateBoard, DataFetchersDelegateMember, DataFetchersDelegatePost and DataFetchersDelegateTopic manage the relations between objects, and their [data loader](https://www.graphql-java.com/documentation/v14/batching/), if relevant
 
 # A note on the database for this sample
@@ -552,7 +552,7 @@ It is very important to remember that the Data Fetchers __should return only the
 
 If the _Topics_ for this _Board_ are also queried, then the _DataFetchersDelegateBoardImpl.topics()_ Data Fetcher will be called, to retrieve. We'll manage this in the later section. 
 
-As it's a query, and the query type is name _QueryType_ in this GraphQL schema, this query is implemented in the _DataFetchersDelegateQueryTypeImpl_ class:
+As it's a query, and the query type is name _Query_ in this GraphQL schema, this query is implemented in the _DataFetchersDelegateQueryImpl_ class:
 
 ```Java
 package org.forum.server.impl;
@@ -563,7 +563,7 @@ import javax.annotation.Resource;
 
 import org.forum.server.graphql.Board;
 import org.forum.server.graphql.Topic;
-import org.forum.server.graphql.util.DataFetchersDelegateQueryType;
+import org.forum.server.graphql.util.DataFetchersDelegateQuery;
 import org.forum.server.jpa.BoardEntity;
 import org.forum.server.jpa.repositories.BoardRepository;
 import org.springframework.stereotype.Component;
@@ -573,7 +573,7 @@ import com.github.dozermapper.core.Mapper;
 import graphql.schema.DataFetchingEnvironment;
 
 @Component
-public class DataFetchersDelegateQueryTypeImpl implements DataFetchersDelegateQueryType {
+public class DataFetchersDelegateQueryImpl implements DataFetchersDelegateQuery {
 
 	@Resource
 	private BoardRepository boardRepository;
@@ -652,7 +652,7 @@ If all this fails, please raise an issue.
 
 ### Let's implement the relation between _Board_ and _Topic_
 
-As stated above, the _DataFetchersDelegateQueryTypeImpl.boards()_ that we implement should return only _Board_ objects. It should not return any attached _Topics_ : it's up to the GraphQL framework, to check if subobjects (like _Topics_ here) are queried, and then call the appropriate Data Fetchers.
+As stated above, the _DataFetchersDelegateQueryImpl.boards()_ that we implement should return only _Board_ objects. It should not return any attached _Topics_ : it's up to the GraphQL framework, to check if subobjects (like _Topics_ here) are queried, and then call the appropriate Data Fetchers.
 
 We now want to be able to query the _boards_ and their _Topics_ :
 
@@ -906,19 +906,19 @@ query {boards {id name topics {id date title nbPosts author{id name email} posts
 ```
 
 
-# Implementing the mutations: DataFetchersDelegateSubscriptionTypeImpl
+# Implementing the mutations: DataFetchersDelegateSubscriptionImpl
 
-To implement the mutations defined in the GraphQL schema, we just have to implement the method of the _DataFetchersDelegateSubscriptionType_ interface in a Spring Component, like the other Data Fetcher Delegates.
+To implement the mutations defined in the GraphQL schema, we just have to implement the method of the _DataFetchersDelegateSubscription_ interface in a Spring Component, like the other Data Fetcher Delegates.
 
 Again, most of the magic is done:
-* in the graphql-java framework that maps the mutation request into the relevant Data Fetcher (that is, the relevant method of your _DataFetchersDelegateSubscriptionType_)
+* in the graphql-java framework that maps the mutation request into the relevant Data Fetcher (that is, the relevant method of your _DataFetchersDelegateSubscription_)
 * In the Spring repositories that execute the query (insert or update) into the database.
 
 Here it goes:
 
 ```Java
 @Component
-public class DataFetchersDelegateMutationTypeImpl implements DataFetchersDelegateMutationType {
+public class DataFetchersDelegateMutationImpl implements DataFetchersDelegateMutation {
 
 	@Resource
 	private Mapper mapper;
@@ -1006,9 +1006,9 @@ mutation createPost {
 ```
 
 
-# Implementing the Subscriptions: DataFetchersDelegateSubscriptionTypeImpl
+# Implementing the Subscriptions: DataFetchersDelegateSubscriptionImpl
 
-Like for queries and mutations, implementing the subscriptions defined in the GraphQL schema is "just" implementing all the Data Fetchers defined in the relevant Data Fetchers Delegate, that is implement all the methods of the _DataFetchersDelegateSubscriptionType_ interface in a Spring Component.
+Like for queries and mutations, implementing the subscriptions defined in the GraphQL schema is "just" implementing all the Data Fetchers defined in the relevant Data Fetchers Delegate, that is implement all the methods of the _DataFetchersDelegateSubscription_ interface in a Spring Component.
 
 This being said, implementing a subscription is a little more complex, as you also have to provide the information flow that the customer apps will subscribed, with these subscriptions.
 
@@ -1090,13 +1090,13 @@ public class PostPublisher {
 }
 ```
 
-Then, we update the mutation Data Fetcher _createPost()_ so that it sends every new post to this ReactiveX Subject. Below are the changes in the _DataFetchersDelegateMutationTypeImpl_ implementation:
+Then, we update the mutation Data Fetcher _createPost()_ so that it sends every new post to this ReactiveX Subject. Below are the changes in the _DataFetchersDelegateMutationImpl_ implementation:
 
 ```Java
 import io.reactivex.subjects.Subject;
 
 @Component
-public class DataFetchersDelegateMutationTypeImpl implements DataFetchersDelegateMutationType {
+public class DataFetchersDelegateMutationImpl implements DataFetchersDelegateMutation {
 
 ...
 	/**
@@ -1138,7 +1138,7 @@ package org.forum.server.impl;
 import javax.annotation.Resource;
 
 import org.forum.server.graphql.Post;
-import org.forum.server.graphql.util.DataFetchersDelegateSubscriptionType;
+import org.forum.server.graphql.util.DataFetchersDelegateSubscription;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1148,7 +1148,7 @@ import graphql.schema.DataFetchingEnvironment;
 import io.reactivex.subjects.Subject;
 
 @Component
-public class DataFetchersDelegateSubscriptionTypeImpl implements DataFetchersDelegateSubscriptionType {
+public class DataFetchersDelegateSubscriptionImpl implements DataFetchersDelegateSubscription {
 
 	/** The logger for this instance */
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());

@@ -5,7 +5,7 @@
 
 	<groupId>com.graphql-java-generator</groupId>
 	<artifactId>GraphQL-Forum-Maven-Sample-server</artifactId>
-	<version>1.17</version>
+	<version>1.17.3</version>
 
 	<url>https://github.com/graphql-java-generator/GraphQL-Forum-Maven-Sample-client
 	</url>
@@ -14,7 +14,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- The graphql plugin's version, used in this tutorial -->
-		<graphql-maven-plugin.version>1.17</graphql-maven-plugin.version>
+		<graphql-maven-plugin.version>1.17.3</graphql-maven-plugin.version>
 		<!-- The Spring Boot version, which should be the same than the one used in the plugin -->
 		<springboot.version>2.4.4</springboot.version>
 	</properties>

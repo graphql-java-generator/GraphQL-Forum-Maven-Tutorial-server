@@ -6,7 +6,7 @@ import javax.annotation.Resource;
 
 import org.forum.server.graphql.Board;
 import org.forum.server.graphql.Topic;
-import org.forum.server.graphql.util.DataFetchersDelegateQueryType;
+import org.forum.server.graphql.util.DataFetchersDelegateQuery;
 import org.forum.server.jpa.BoardEntity;
 import org.forum.server.jpa.TopicEntity;
 import org.forum.server.jpa.repositories.BoardRepository;
@@ -18,7 +18,7 @@ import com.github.dozermapper.core.Mapper;
 import graphql.schema.DataFetchingEnvironment;
 
 @Component
-public class DataFetchersDelegateQueryTypeImpl implements DataFetchersDelegateQueryType {
+public class DataFetchersDelegateQueryTypeImpl implements DataFetchersDelegateQuery {
 
 	@Resource
 	private BoardRepository boardRepository;
