@@ -1,11 +1,10 @@
 <?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.graphql-java-generator</groupId>
 	<artifactId>GraphQL-Forum-Maven-Sample-server</artifactId>
-	<version>1.17.3</version>
+	<version>1.0-SNAPSHOT</version>
 
 	<url>https://github.com/graphql-java-generator/GraphQL-Forum-Maven-Sample-client
 	</url>
@@ -14,7 +13,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- The graphql plugin's version, used in this tutorial -->
-		<graphql-maven-plugin.version>1.17.3</graphql-maven-plugin.version>
+		<graphql-maven-plugin.version>1.18.2</graphql-maven-plugin.version>
 		<!-- The Spring Boot version, which should be the same than the one used in the plugin -->
 		<springboot.version>2.4.4</springboot.version>
 	</properties>
@@ -58,8 +57,10 @@
 						</customScalar>
 					</customScalars>
 					<!-- The parameters below change the 1.x default behavior. They are set to respect the behavior of the future 2.x versions -->
+					<copyRuntimeSources>false</copyRuntimeSources>
 					<generateBatchLoaderEnvironment>true</generateBatchLoaderEnvironment>
 					<separateUtilityClasses>true</separateUtilityClasses>
+					<skipGenerationIfSchemaHasNotChanged>true</skipGenerationIfSchemaHasNotChanged>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -105,9 +106,8 @@
 		<!-- Dependencies for GraphQL -->
 		<dependency>
 			<groupId>com.graphql-java-generator</groupId>
-			<artifactId>graphql-java-server-dependencies</artifactId>
+			<artifactId>graphql-java-server-runtime</artifactId>
 			<version>${graphql-maven-plugin.version}</version>
-			<type>pom</type>
 		</dependency>
 
 		<!-- Add of the graphiql interface, to test your GraphQL server -->

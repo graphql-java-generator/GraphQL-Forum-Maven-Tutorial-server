@@ -50,7 +50,7 @@ Let's first have a look at the Maven **pom.xml** file:
 ```XML
 
 	<properties>
-		<graphql-maven-plugin.version>1.17.3</graphql-maven-plugin.version>
+		<graphql-maven-plugin.version>1.18.1</graphql-maven-plugin.version>
 	</properties>
 
 	<build>
@@ -127,8 +127,7 @@ Then the Gradle **build.properties** and **build.gradle** files:
 Define once the plugin version in the **build.properties** file:
 
 ```Groovy
-graphQLPluginVersion = 1.17.3p1
-graphQLRuntimeVersion = 1.17.3
+graphQLPluginVersion = 1.18.1
 ```
 Then the Gradle **build.gradle** file:
 
@@ -146,7 +145,7 @@ repositories {
 dependencies {
 	// The graphql-java-runtime module agregates all dependencies for the generated code, including the plugin runtime
 	// CAUTION: this version should be exactly the same as the graphql-gradle-plugin's version
-	implementation 'com.graphql-java-generator:graphql-java-server-dependencies:${graphQLRuntimeVersion}'
+	implementation 'com.graphql-java-generator:graphql-java-server-dependencies:${graphQLPluginVersion}'
 	implementation 'com.github.dozermapper:dozer-core:6.5.0'
 	implementation 'io.reactivex.rxjava2:rxjava:2.2.19'
 	
