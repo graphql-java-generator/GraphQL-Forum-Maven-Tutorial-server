@@ -51,7 +51,7 @@ public class DataFetchersDelegatePostImpl implements DataFetchersDelegatePost {
 	}
 
 	@Override
-	public List<Post> batchLoader(List<UUID> keys, BatchLoaderEnvironment env) {
+	public List<Post> unorderedReturnBatchLoader(List<UUID> keys, BatchLoaderEnvironment env) {
 		Iterable<PostEntity> topics = postRepository.findAllById(keys);
 		return util.mapList(topics, PostEntity.class, Post.class);
 	}

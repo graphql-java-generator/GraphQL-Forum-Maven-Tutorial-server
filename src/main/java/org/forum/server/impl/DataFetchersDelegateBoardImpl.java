@@ -45,7 +45,7 @@ public class DataFetchersDelegateBoardImpl implements DataFetchersDelegateBoard 
 	}
 
 	@Override
-	public List<Board> batchLoader(List<UUID> keys, BatchLoaderEnvironment env) {
+	public List<Board> unorderedReturnBatchLoader(List<UUID> keys, BatchLoaderEnvironment env) {
 		Iterable<BoardEntity> boards = boardRepository.findAllById(keys);
 		return util.mapList(boards, BoardEntity.class, Board.class);
 	}

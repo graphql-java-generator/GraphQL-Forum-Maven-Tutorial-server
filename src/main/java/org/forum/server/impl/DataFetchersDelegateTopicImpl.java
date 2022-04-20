@@ -90,7 +90,7 @@ public class DataFetchersDelegateTopicImpl implements DataFetchersDelegateTopic 
 	}
 
 	@Override
-	public List<Topic> batchLoader(List<UUID> keys, BatchLoaderEnvironment env) {
+	public List<Topic> unorderedReturnBatchLoader(List<UUID> keys, BatchLoaderEnvironment env) {
 		Iterable<TopicEntity> topics = topicRepository.findAllById(keys);
 		return util.mapList(topics, TopicEntity.class, Topic.class);
 	}

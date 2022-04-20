@@ -23,7 +23,7 @@ public class DataFetchersDelegateMemberImpl implements DataFetchersDelegateMembe
 	private MemberRepository memberRepository;
 
 	@Override
-	public List<Member> batchLoader(List<UUID> keys, BatchLoaderEnvironment env) {
+	public List<Member> unorderedReturnBatchLoader(List<UUID> keys, BatchLoaderEnvironment env) {
 		Iterable<MemberEntity> members = memberRepository.findAllById(keys);
 		return util.mapList(members, MemberEntity.class, Member.class);
 	}
