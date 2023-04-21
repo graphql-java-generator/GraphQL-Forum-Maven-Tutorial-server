@@ -2,7 +2,7 @@ package org.forum.server.impl;
 
 import java.util.List;
 
-import javax.annotation.Resource;
+import javax.security.auth.Subject;
 
 import org.forum.server.graphql.Board;
 import org.forum.server.graphql.Member;
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 import com.github.dozermapper.core.Mapper;
 
 import graphql.schema.DataFetchingEnvironment;
-import io.reactivex.subjects.Subject;
+import jakarta.annotation.Resource;
 
 @Component
 public class DataFetchersDelegateMutationImpl implements DataFetchersDelegateMutation {

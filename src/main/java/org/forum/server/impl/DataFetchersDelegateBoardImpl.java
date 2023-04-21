@@ -4,8 +4,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import javax.annotation.Resource;
-
 import org.dataloader.BatchLoaderEnvironment;
 import org.forum.server.graphql.Board;
 import org.forum.server.graphql.Topic;
@@ -17,6 +15,7 @@ import org.forum.server.jpa.repositories.TopicRepository;
 import org.springframework.stereotype.Component;
 
 import graphql.schema.DataFetchingEnvironment;
+import jakarta.annotation.Resource;
 
 @Component
 public class DataFetchersDelegateBoardImpl implements DataFetchersDelegateBoard {
