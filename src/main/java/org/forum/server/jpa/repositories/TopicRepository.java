@@ -29,9 +29,9 @@ public interface TopicRepository extends CrudRepository<TopicEntity, UUID>, Find
 	 * @return
 	 */
 	@Query(value = "" //
-			+ " select * " //
-			+ " from topic t "//
-			+ " join board b on t.board_id = b.id " //
+			+ " select t.* " //
+			+ " from Topic t "//
+			+ " join Board b on t.board_id = b.id " //
 			+ " where b.name = ?1" //
 			, nativeQuery = true)
 	List<TopicEntity> findByBoardName(String name);

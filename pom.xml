@@ -2,9 +2,16 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.0.2</version>
+		<relativePath />
+	</parent>
+
 	<groupId>com.graphql-java-generator</groupId>
 	<artifactId>GraphQL-Forum-Maven-Sample-server</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>2.0RC1</version>
 
 	<url>https://github.com/graphql-java-generator/GraphQL-Forum-Maven-Sample-client
 	</url>
@@ -13,9 +20,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- The graphql plugin's version, used in this tutorial -->
-		<graphql-maven-plugin.version>1.18.6</graphql-maven-plugin.version>
-		<!-- The Spring Boot version, which should be the same than the one used in the plugin -->
-		<springboot.version>2.4.4</springboot.version>
+		<graphql-maven-plugin.version>2.0RC1</graphql-maven-plugin.version>
 	</properties>
 
 
@@ -25,7 +30,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
@@ -48,6 +52,8 @@
 					<!-- https://graphql-maven-plugin-project.graphql-java-generator.com/graphql-maven-plugin/generateServerCode-mojo.html -->
 					<packageName>org.forum.server.graphql</packageName>
 					<scanBasePackages>org.forum.server.impl, org.forum.server.jpa</scanBasePackages>
+					<schemaPersonalizationFile>src/main/graphql/forum_personalization.json</schemaPersonalizationFile>
+					<useJakartaEE9>true</useJakartaEE9><!-- This is mandatory for Spring Boot 3 -->
 					<customScalars>
 						<customScalar>
 							<graphQLTypeName>Date</graphQLTypeName>
@@ -67,7 +73,6 @@
 				<!-- This helps by adding the generated source in the build path of your IDE -->
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>3.0.0</version>
 				<executions>
 					<execution>
 						<id>add-source</id>
@@ -87,7 +92,6 @@
 				<!-- Needed to properly package the jar or war, so that spring can link all resources together -->
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>2.4.0</version>
 				<executions>
 					<execution>
 						<goals>
@@ -109,29 +113,23 @@
 			<artifactId>graphql-java-server-runtime</artifactId>
 			<version>${graphql-maven-plugin.version}</version>
 		</dependency>
-
-		<!-- Add of the graphiql interface, to test your GraphQL server -->
-		<!-- It's available at http://localhost:8180/graphiql -->
+		
+		<!-- Mandatory to enable Web Sockets for Spring-mvc application (mandatory for subscription) -->
 		<dependency>
-			<!-- com.graphql-java:graphiql-spring-boot-starter is deprecated. This project has been moved to com.graphql-java-kickstart -->
-			<groupId>com.graphql-java-kickstart</groupId>
-			<artifactId>graphiql-spring-boot-starter</artifactId>
-			<version>6.0.1</version>
-			<scope>runtime</scope>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
 		</dependency>
-
+		
 		<!-- Database access dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
-			<version>${springboot.version}</version>
 		</dependency>
 		<dependency>
 			<!-- Only here for the tests, to load the data in an in-memory database -->
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>runtime</scope>
-			<version>2.1.210</version>
 		</dependency>
 
 		<!-- A mapper that'll help you to create Entities from GraphQL objects, and reverse -->
@@ -139,12 +137,6 @@
 			<groupId>com.github.dozermapper</groupId>
 			<artifactId>dozer-core</artifactId>
 			<version>6.5.2</version>
-		</dependency>
-
-		<dependency>
-			<groupId>io.reactivex.rxjava2</groupId>
-			<artifactId>rxjava</artifactId>
-			<version>2.2.19</version>
 		</dependency>
 
 	</dependencies>

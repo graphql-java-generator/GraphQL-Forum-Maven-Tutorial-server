@@ -1,6 +1,6 @@
 package org.forum.server.impl;
 
-import javax.annotation.Resource;
+import javax.security.auth.Subject;
 
 import org.forum.server.graphql.Post;
 import org.forum.server.graphql.util.DataFetchersDelegateSubscription;
@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import graphql.schema.DataFetchingEnvironment;
-import io.reactivex.subjects.Subject;
+import jakarta.annotation.Resource;
 
 @Component
 public class DataFetchersDelegateSubscriptionTypeImpl implements DataFetchersDelegateSubscription {

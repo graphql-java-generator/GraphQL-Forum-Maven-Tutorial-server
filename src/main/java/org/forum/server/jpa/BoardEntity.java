@@ -4,10 +4,10 @@ package org.forum.server.jpa;
 import java.util.List;
 import java.util.UUID;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Transient;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Transient;
 
 @Entity(name = "Board")
 public class BoardEntity {
