@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.0.6</version>
+		<version>3.0.5</version>
 		<relativePath />
 	</parent>
 
@@ -20,7 +20,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- The graphql plugin's version, used in this tutorial -->
-		<graphql-maven-plugin.version>2.0</graphql-maven-plugin.version> 
+		<graphql-maven-plugin.version>2.3.1</graphql-maven-plugin.version>
 	</properties>
 
 
@@ -53,7 +53,7 @@
 					<packageName>org.forum.server.graphql</packageName>
 					<scanBasePackages>org.forum.server.impl, org.forum.server.jpa</scanBasePackages>
 					<schemaPersonalizationFile>src/main/graphql/forum_personalization.json</schemaPersonalizationFile>
-					<useJakartaEE9>true</useJakartaEE9><!-- This is mandatory for Spring Boot 3 -->
+					<useJakartaEE9>true</useJakartaEE9> <!-- This is mandatory for Spring Boot 3 -->
 					<customScalars>
 						<customScalar>
 							<graphQLTypeName>Date</graphQLTypeName>
@@ -108,13 +108,19 @@
 			<artifactId>graphql-java-server-runtime</artifactId>
 			<version>${graphql-maven-plugin.version}</version>
 		</dependency>
-		
+
 		<!-- Mandatory to enable Web Sockets for Spring-mvc application (mandatory for subscription) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-websocket</artifactId>
 		</dependency>
-		
+
+		<!-- Oauth2 authentication -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+		</dependency>
+
 		<!-- Database access dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
