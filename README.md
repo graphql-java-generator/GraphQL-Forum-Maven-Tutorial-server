@@ -108,7 +108,6 @@ Let's first have a look at the Maven **pom.xml** file:
 			<groupId>com.graphql-java-generator</groupId>
 			<artifactId>graphql-java-server-runtime</artifactId>
 			<version>${graphql-maven-plugin.version}</version>
-			<type>pom</type>
 		</dependency>
 
 		<!-- Add of the graphiql interface, to test your GraphQL server -->
