@@ -10,6 +10,7 @@ import org.forum.server.jpa.MemberEntity;
 import org.forum.server.jpa.repositories.MemberRepository;
 import org.springframework.stereotype.Component;
 
+import graphql.schema.DataFetchingEnvironment;
 import jakarta.annotation.Resource;
 
 @Component
@@ -26,6 +27,14 @@ public class DataFetchersDelegateMemberImpl implements DataFetchersDelegateMembe
 	public List<Member> unorderedReturnBatchLoader(List<UUID> keys, BatchLoaderEnvironment env) {
 		Iterable<MemberEntity> members = memberRepository.findAllById(keys);
 		return util.mapList(members, MemberEntity.class, Member.class);
+	}
+
+	@Override
+	public Object name(DataFetchingEnvironment dataFetchingEnvironment, Member origin, Boolean uppercase) {
+		if (uppercase != null && uppercase) {
+			origin.setName(origin.getName().toUpperCase());
+		}
+		return origin;
 	}
 
 }

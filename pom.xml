@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.1</version>
+		<version>3.5.4</version>
 		<relativePath />
 	</parent>
 
@@ -20,7 +20,9 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- The graphql plugin's version, used in this tutorial -->
-		<graphql-maven-plugin.version>2.4</graphql-maven-plugin.version>
+		<graphql-maven-plugin.version>3.0.1</graphql-maven-plugin.version>
+		
+		<dozer.version>7.0.0</dozer.version>
 	</properties>
 
 
@@ -31,8 +33,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>17</source>
+					<target>17</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -53,7 +55,6 @@
 					<packageName>org.forum.server.graphql</packageName>
 					<scanBasePackages>org.forum.server.impl, org.forum.server.jpa</scanBasePackages>
 					<schemaPersonalizationFile>src/main/graphql/forum_personalization.json</schemaPersonalizationFile>
-					<useJakartaEE9>true</useJakartaEE9> <!-- This is mandatory for Spring Boot 3 -->
 					<customScalars>
 						<customScalar>
 							<graphQLTypeName>Date</graphQLTypeName>
@@ -131,7 +132,7 @@
 		<dependency>
 			<groupId>com.github.dozermapper</groupId>
 			<artifactId>dozer-core</artifactId>
-			<version>6.5.2</version>
+			<version>${dozer.version}</version>
 		</dependency>
 
 	</dependencies>

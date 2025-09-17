@@ -4,14 +4,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import jakarta.annotation.Resource;
-
 import org.dataloader.BatchLoaderEnvironment;
 import org.dataloader.DataLoader;
 import org.forum.server.graphql.Member;
 import org.forum.server.graphql.Post;
 import org.forum.server.graphql.util.DataFetchersDelegatePost;
-import org.forum.server.jpa.MemberEntity;
 import org.forum.server.jpa.PostEntity;
 import org.forum.server.jpa.repositories.MemberRepository;
 import org.forum.server.jpa.repositories.PostRepository;
@@ -20,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.github.dozermapper.core.Mapper;
 
 import graphql.schema.DataFetchingEnvironment;
+import jakarta.annotation.Resource;
 
 @Component
 public class DataFetchersDelegatePostImpl implements DataFetchersDelegatePost {
@@ -34,12 +32,6 @@ public class DataFetchersDelegatePostImpl implements DataFetchersDelegatePost {
 	private MemberRepository memberRepository;
 	@Resource
 	private PostRepository postRepository;
-
-	@Override
-	public Member author(DataFetchingEnvironment dataFetchingEnvironment, Post origin) {
-		MemberEntity author = memberRepository.findAuthorOfTopic(origin.getId());
-		return mapper.map(author, Member.class);
-	}
 
 	@Override
 	public CompletableFuture<Member> author(DataFetchingEnvironment dataFetchingEnvironment,

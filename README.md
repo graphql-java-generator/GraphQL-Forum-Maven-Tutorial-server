@@ -1,6 +1,5 @@
 # A tutorial for the GraphQL Maven plugin (server side)
 
-
 This Tutorial describes how-to create a GraphQL server, with the [graphql-maven-plugin](https://github.com/graphql-java-generator/graphql-maven-plugin-project) and the [graphql Gradle plugin](https://github.com/graphql-java-generator/graphql-gradle-plugin-project).
 
 
@@ -22,22 +21,21 @@ This sample is based on the Forum schema, [available here](https://github.com/gr
 This schema contains:
 
 * A custom scalar definition: Date.
-    * This allows to define new type to define objet's field. We'll have to provide it's implementation to read and write Date fields. 
-* A schema object. This declaration is optional. It allows to define query/mutation/subscription specific names. This schema declares:
-    * Query as a query.
-    * Mutation as a mutation
-    * Subscription as a subscription
-    * These types are declared below, as any regular object. Their definition is that of standard Object, but their meaning is very different. These fields are respectively the queries, mutations and subscriptions that you can execute, as a client GraphQL schema that connects to a GraphQL server that implements this schema.
+    * This GraphQL capability allows to define new type for object field. Once defined in the GraphQL schema, its implementation must be provided, to read and write when sending or receiving data. 
+* This schema declares:
+    * A `Query`, to read data on the server
+    * A `Mutation`, to change data on the server
+    * A `Subscription`, which allows to receive flows of data from the server
 * Four regular GraphQL objects: Member, Board, Topic, Post
-    * These are the objects defined in the Object model that can queried (with queries or subscriptions), or inserted/updated (with mutations)
+    * These are the objects that contains the data
 * One enumeration: MemberType
-    * Enumeration are a kind of scalar, that allows only a defined list of values. MemberType is one of ADMIN, MODERATOR or STANDARD.
+    * Enumeration are a kind of scalar, that allows only a defined list of values. A MemberType may only be one of ADMIN, MODERATOR or STANDARD.
 * Three input types: TopicPostInput, TopicInput and PostInput
-    * These are objects that are not in the Object model. They may not be returned by queries, mutations or subscriptions. As their name means, they can only be used as field parameters. And regular objects maynot be use as field parameters.
+    * These are objects that can only be used as field parameters, whereas regular objects may not be use as field parameters.
 
 This schema is stored in the _/src/main/resources/_ project folder for convenience. 
 
-It could be also be used in another folder, like _/src/main/graphql/_. In this case, the schema is not stored in the packaged jar (which is Ok), and you have to use the plugin _schemaFileFolder_ parameter, to indicate where to find this schema.
+It could be also be used in another folder, like _/src/main/graphql/_. In this case, the schema is not stored in the packaged jar (which is fine), and you have to use the plugin _schemaFileFolder_ parameter, to indicate where the plugin can find this schema.
 
 ## The Maven pom.xml and Gradle build.gradle files
 
@@ -50,22 +48,12 @@ Let's first have a look at the Maven **pom.xml** file:
 ```XML
 
 	<properties>
-		<graphql-maven-plugin.version>2.4</graphql-maven-plugin.version>
+		<graphql-maven-plugin.version>3.0.1</graphql-maven-plugin.version>
 	</properties>
 
 	<build>
 ...
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-					<releasse>1.8</releasse>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>com.graphql-java-generator</groupId>
 				<artifactId>graphql-maven-plugin</artifactId>
@@ -109,18 +97,7 @@ Let's first have a look at the Maven **pom.xml** file:
 			<artifactId>graphql-java-server-runtime</artifactId>
 			<version>${graphql-maven-plugin.version}</version>
 		</dependency>
-
-		<!-- Add of the graphiql interface, to test your GraphQL server -->
-		<!-- It's available at http://localhost:8180/graphiql -->
-		<dependency>
-			<!-- com.graphql-java:graphiql-spring-boot-starter is deprecated. This 
-				project has been moved to com.graphql-java-kickstart -->
-			<groupId>com.graphql-java-kickstart</groupId>
-			<artifactId>graphiql-spring-boot-starter</artifactId>
-			<version>6.0.1</version>
-			<scope>runtime</scope>
-		</dependency>
-
+...
 	</dependencies>
 ```
 
@@ -128,13 +105,14 @@ Let's first have a look at the Maven **pom.xml** file:
 Define once the plugin version in the **build.properties** file:
 
 ```Groovy
-graphQLPluginVersion = 2.4
+graphQLPluginVersion = 3.0.1
 ```
+
 Then the Gradle **build.gradle** file:
 
 ```Groovy
 plugins {
-	id "com.graphql_java_generator.graphql-gradle-plugin" version "${graphQLPluginVersion}"
+	id "com.graphql_java_generator.graphql-gradle-plugin3" version "${graphQLPluginVersion}"
 	id 'java'
 }
 
@@ -144,17 +122,10 @@ repositories {
 }
 
 dependencies {
-	// The graphql-java-runtime module agregates all dependencies for the generated code, including the plugin runtime
+	// The graphql-java-runtime module aggregates all dependencies for the generated code, including the plugin runtime
 	// CAUTION: this version should be exactly the same as the graphql-gradle-plugin's version
 	implementation 'com.graphql-java-generator:graphql-java-server-dependencies:${graphQLPluginVersion}'
-	implementation 'com.github.dozermapper:dozer-core:6.5.0'
-	implementation 'io.reactivex.rxjava2:rxjava:2.2.19'
-	
-	// The Spring Boot version should be the same as the Spring Boot version of the graphql-gradle-plugin
-	implementation('org.springframework.boot:spring-boot-starter-data-jpa:2.4.4')
-	
-	runtimeOnly 'com.graphql-java-kickstart:graphiql-spring-boot-starter:6.0.1'
-	runtimeOnly 'com.h2database:h2:2.1.210'
+...
 }
 
 // The line below makes the GraphQL plugin be executed before Java compiles, so that all sources are generated on time
@@ -169,20 +140,20 @@ sourceSets.main.java.srcDirs += '/build/generated/sources/graphqlGradlePlugin'
 generateServerCodeConf {
 	packageName = 'org.forum.server.graphql'	
 	scanBasePackages = 'org.forum.server.impl, org.forum.server.jpa'
+	schemaPersonalizationFile = 'src/main/graphql/forum_personalization.json'
 	customScalars = [ [
 			graphQLTypeName: "Date",
 			javaType: "java.util.Date",
 			graphQLScalarTypeStaticField: "com.graphql_java_generator.customscalars.GraphQLScalarTypeDate.Date"
 	] ]
-
-	// The parameters below change the 1.x default behavior. They are set to respect the behavior of the future 2.x versions
-	copyRuntimeSources = false
-	generateBatchLoaderEnvironment = true
-	separateUtilityClasses = true
 }
+
 ```
 
-The compiler must be set to version 1.8 (or higher).
+
+The compiler must be at least a java version 17.
+
+The previous version of the plugin is still maintained, and is compatible with spring boot 2 and java 8. To use it, just change the plugin name from `com.graphql_java_generator.graphql-gradle-plugin3` to `com.graphql_java_generator.graphql-gradle-plugin`. The version number remains the same.
 
 In this plugin declaration:
 * (for Maven only) The plugin execution is mapped to its generateServerCode goal
@@ -389,7 +360,7 @@ dependencies {
 	implementation('org.springframework.boot:spring-boot-starter-data-jpa:2.2.6.RELEASE') {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
     }
-	runtime 'com.h2database:h2:1.4.199'
+...
 }
 ```
 
