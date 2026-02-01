@@ -18,7 +18,7 @@ create table board (
 create table topic (
 	id uuid not null,
 	board_id uuid not null,
-	date datetime not null,
+	date timestamp not null,
 	author_id uuid,
 	publicly_available boolean,
 	nb_posts int,
@@ -29,7 +29,7 @@ create table topic (
 
 create table post (
 	id uuid not null,
-	date datetime not null,
+	date timestamp not null,
 	topic_id uuid not null,
 	author_id uuid,
 	publicly_available boolean,
