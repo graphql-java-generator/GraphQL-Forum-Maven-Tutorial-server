@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.forum.server.impl;
 
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
